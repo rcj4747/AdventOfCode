@@ -7,6 +7,18 @@ operations = {
 }
 
 
+def push_number(stack, a):
+    # In Part 2 the +, - have higher precedence than * so we will
+    # process them as soon as we have 2 numbers to operate on.
+    if PART2 and stack and stack[-1] in ['+', '-']:
+        op = stack.pop()
+        b = stack.pop()
+        stack.append(process_stack([b, op, a]))
+    else:
+        stack.append(a)
+    return stack
+
+
 def process_stack(stack):
     a = int(stack.pop())
     while stack:
@@ -32,7 +44,7 @@ def process_input(input_list):
                 input_list.append(cur)
 
             input_list, ans = process_input(input_list)
-            stack.append(ans)
+            stack = push_number(stack, ans)
 
         elif cur.startswith('('):
             # Strip off a leading '('
@@ -41,7 +53,7 @@ def process_input(input_list):
             # Put the digit portion on the stack
             stripped = cur.lstrip('(')
             if stripped.isdigit():
-                stack.append(stripped)
+                stack = push_number(stack, stripped)
 
             # Put any remaining characters back on the input
             cur = cur[:-len(stripped)]
@@ -51,15 +63,16 @@ def process_input(input_list):
             return input_list, process_stack(stack)
 
         else:
-            stack.append(cur)
+            stack = push_number(stack, cur)
 
     return input_list, process_stack(stack)
 
 
-with open('input.txt') as file:
-    part1 = 0
-    for line in file.readlines():
-        line = line.strip()
-        _, answer = process_input(line.split(' '))
-        part1 += answer
-    print(f'{part1 = }')
+for PART2 in False, True:
+    with open('input.txt') as file:
+        answer = 0
+        for line in file.readlines():
+            line = line.strip()
+            _, line_answer = process_input(line.split(' '))
+            answer += line_answer
+        print(f'{"Part 1:" if not PART2 else "Part 2:"} {answer}')
